@@ -8,12 +8,19 @@ import (
     "net"
     "io"
     "time"
-//    "strings"
+    "strings"
 //sc  "strconv"
 )
 // zero byte: "\x00"
 
 /* Version 1.0 Stable */
+
+type mtype int
+const (
+    USR mtype = iota
+    SRV
+    GRN
+)
 
 /* message buffer to print to screen and possibly scroll in the future */
 var msgs []string = make([]string, 50)
@@ -21,6 +28,28 @@ var msgs []string = make([]string, 50)
 var txt []byte = make([]byte, 1024)
 var posTxt uint32 = 0
 var pos, lpos int
+
+func messageType(msg string)(ftype mtype) {
+    msgarr := strings.SplitN(msg, ":", 2)
+    newmsg := strings.Join(msgarr, "")
+    if newmsg == msg {
+        ftype = USR
+    } else {
+        str := msgarr[1]
+        var r rune
+        var size int
+        for i:=0; i < 2; i++ {
+            r, size = utf8.DecodeRuneInString(str)
+            str = str[size:]
+        }
+        if r == '>' {
+            ftype = GRN
+        } else {
+            ftype = SRV
+        }
+    }
+    return
+}
 
 func stripZeroes(in []byte)([]byte) {
     blank := []byte{0}
@@ -123,8 +152,11 @@ func draw(w, h int) {
         i:=0
         for y := bot; y > top; y-- {
             r, _ := utf8.DecodeRuneInString(msgs[i])
-            if r == '>' {
+            mtype := messageType(msgs[i])
+            if mtype == GRN || r == '>' {
                 tbPrint(1, y, termbox.ColorGreen, termbox.ColorBlack, msgs[i])
+            } else if mtype == USR {
+                tbPrint(1, y, termbox.ColorWhite, termbox.ColorBlack, msgs[i])
             } else {
                 tbPrint(1, y, termbox.ColorCyan, termbox.ColorBlack, msgs[i])
             }
@@ -166,7 +198,7 @@ func draw(w, h int) {
         pos+=w-1
         tbPrint(0, h-1, termbox.ColorWhite, termbox.ColorBlack, string(txt[lpos:pos]))
         termbox.Flush()
-        time.Sleep(20 * time.Millisecond)
+        time.Sleep(50 * time.Millisecond)
     }
 }
 
