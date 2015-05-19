@@ -20,7 +20,6 @@ var msgs []string = make([]string, 50)
 /* text typed by the user */
 var txt []byte = make([]byte, 1024)
 var posTxt uint32 = 0
-
 var pos, lpos int
 
 func stripZeroes(in []byte)([]byte) {
@@ -172,8 +171,9 @@ func readServer(conn net.Conn, runChan chan bool, pChan chan uint32) {
         words := make([]byte, 512)
         _, err := conn.Read(words)
         if err == io.EOF {
-            addMsg("\nDisconnected from server.\n")
+            addMsg("Disconnected from server.")
             runChan <- false
+            check(err)
             break
         } else {
             check(err)
@@ -246,13 +246,13 @@ func main() {
     termbox.Flush()
     go draw(w,h)
     termbox.Flush()
-    for run:=true;run==true; {
+    for running:=true;running==true; {
         switch ev := termbox.PollEvent(); ev.Type {
             case termbox.EventKey:
                 key := string(ev.Ch)
 
                     if ev.Key == termbox.KeyCtrlQ {
-                        run=false
+                        running=false
                         termbox.Flush()
                     } else if ev.Key == termbox.KeyEnter {
 
