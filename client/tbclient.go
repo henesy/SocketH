@@ -122,7 +122,13 @@ func draw(w, h int) {
         /* handle messages */
         i:=0
         for y := bot; y > top; y-- {
-            tbPrint(1, y, termbox.ColorCyan, termbox.ColorBlack, msgs[i])
+            r, _ := utf8.DecodeRuneInString(msgs[i])
+            if r == '>' {
+                tbPrint(1, y, termbox.ColorGreen, termbox.ColorBlack, msgs[i])
+            } else {
+                tbPrint(1, y, termbox.ColorCyan, termbox.ColorBlack, msgs[i])
+            }
+
             leng := utf8.RuneCountInString(msgs[i])
             for x := left+leng; x < right; x++ {
                 tbPrint(x, y, termbox.ColorCyan, termbox.ColorBlack, " ")
