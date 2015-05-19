@@ -9,7 +9,7 @@ import (
     "io"
     "time"
     "strings"
-//sc  "strconv"
+    "os"
 )
 // zero byte: "\x00"
 
@@ -257,7 +257,9 @@ func dialServer(msgChan chan string, target string) {
 /* check checks the error err for an error and crashes the program if != nil */
 func check(err error) {
     if err != nil {
-        panic(err)
+        termbox.Close()
+        fmt.Print(err, "\n")
+        os.Exit(1)
     }
 }
 
